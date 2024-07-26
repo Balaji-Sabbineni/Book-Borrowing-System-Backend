@@ -4,11 +4,14 @@ const body_parser = require('body-parser');
 const database = require('./config/database.config');
 
 const BookRouter = require('./routes/books.route');
+const BorrowRouter = require('./routes/borrow.route');
 
 const app = express();
 
 app.use(body_parser.json());
+app.use(body_parser.urlencoded({extended: true}));
 
-app.use('/books', BookRouter);
+app.use('/user/books', BookRouter);
+app.use('/user/books/borrow', BorrowRouter);
 
 module.exports = app;

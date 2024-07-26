@@ -9,18 +9,14 @@ const BookSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    genre: {
-        type: String
+    owner: {
+        type: String,
+        // ref:'User',
+        required: true
     },
     available: {
         type: Boolean,
         default: true
-    },
-    borrowDate: {
-        type: Date
-    },
-    returnDate: {
-        type: Date
     }
 });
 

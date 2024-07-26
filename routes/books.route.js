@@ -1,65 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/book.model');
+const BookController = require('../controllers/book.controller');
 
-router.post('/', async (req, res, next) => {
-    const book = new Book({
-        title: req.body.title,
-        author: req.body.author,
-        genre: req.body.genre,
-        available: req.body.available,
-        borrowedDate: req.body.borrowedDate,
-        returnedDate: req.body.returnedDate
-    });
-    try {
-        const savedBook = await book.save();
-        res.status(201).json({ Status: true, savedBook });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+router.post('/', BookController.addBook);
 
-router.get('/', async (req, res, next) => {
-    try {
-        const books = await Book.find();
-        res.status(200).json(books);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+router.get('/', BookController.showAllBooks);
 
-router.get('/:id', async (req, res, next) => {
-    try {
-        const bookId = req.params.id;
-        const book = await Book.findById(bookId);
-        if (!book) {
-            res.status(404).json({ message: 'Book not found' });
-        } else {
-            res.status(200).json(book);
-        }
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+// router.get('/search', async (req, res, next) => {
+//     try {
+//         const { title, author, genre } = req.query;
 
-router.patch('/:id', async (req, res, next) => {
-    try {
-        const bookId = req.params.id;
-        const updatedBook = await Book.findByIdAndUpdate(bookId, req.body, { new: true });
-        res.status(200).json(updatedBook);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+//         if (!title || !author || !genre) {
+//             return res.status(400).json({ message: 'Search query cannot be empty' });
+//         }
 
-router.delete('/:id', async (req, res, next) => {
-    try {
-        const bookId = req.params.id;
-        const deletedBook = await Book.findByIdAndDelete(bookId);
-        res.status(200).json(deletedBook);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+//         const searchConditions = [];
+//         if (title) searchConditions.push({ title: { $regex: title, $options: 'i' } });
+//         if (author) searchConditions.push({ author: { $regex: author, $options: 'i' } });
+//         if (genre) searchConditions.push({ genre: { $regex: genre, $options: 'i' } });
+
+//         const books = await Book.find({ $or: searchConditions });
+
+//         res.status(200).json(books);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// });
+
+router.get('/:id', BookController.findBook);
+
+router.patch('/:id', BookController.updateBook);
+
+router.delete('/:id', BookController.deleteBook);
 
 module.exports = router;
