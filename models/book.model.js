@@ -11,7 +11,7 @@ const BookSchema = mongoose.Schema({
     },
     owner: {
         type: String,
-        // ref:'User',
+        ref:'User',
         required: true
     },
     available: {
