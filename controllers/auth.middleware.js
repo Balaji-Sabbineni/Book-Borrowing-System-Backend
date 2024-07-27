@@ -3,7 +3,7 @@ const User = require('../models/user.model');
 
 const authMiddleware = async (req, res, next) => {
     req.user = {
-        _id: '66a496edbacfc9318ea3f469',
+        _id: '66a492ddbce737d670147ddb',
         name: 'ash'
     };
     next();

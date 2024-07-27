@@ -30,11 +30,9 @@ exports.showUsers = async (req, res, next) => {
             const query = {};
             if(name) {
                 query.name = { $regex: name, $options: 'i' };
-                // user = await User.find({ name: { $regex: name, $options: 'i' } });
             }
             if(email) {
                 query.email = { $regex: email, $options: 'i' };
-                // user = await User.find({ email: { $regex: email, $options: 'i' } });
             }
             user = await User.find(query);
 

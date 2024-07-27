@@ -15,16 +15,17 @@ const borrowingSchema = mongoose.Schema({
         required: true
     },
     status: {
-        type: String, 
-        enum: ['pending', 'approved', 'returned'], default: 'pending'
+        type: String,
+        enum: ['pending', 'accepted', 'approved', 'returned'], 
+        default: 'pending'
     },
-    borrowedDate: { 
+    borrowedDate: {
         type: Date
     },
-    returnDate:{
+    returnDate: {
         type: Date,
     }
-});
+}, { timestamps: true });
 
 const BorrowingModel = mongoose.model('Borrowing', borrowingSchema);
 module.exports = BorrowingModel;

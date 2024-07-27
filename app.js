@@ -13,7 +13,7 @@ app.use(body_parser.json());
 app.use(body_parser.urlencoded({extended: true}));
 
 app.use('/user/books', BookRouter);
-app.use('/user/books/borrow', BorrowRouter);
+app.use('/request', BorrowRouter);
 app.use('/user', UserRouter);
 
 module.exports = app;

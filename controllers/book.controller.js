@@ -8,8 +8,11 @@ exports.addBook = async (req, res, next) => {
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
+        genre: req.body.genre,
         owner: req.user._id,
-        available: req.body.available
+        available: req.body.available,
+        borrowedDate: req.body.borrowedDate,
+        returnedDate: req.body.returnedDate
     });
     try {
         const savedBook = await book.save();
