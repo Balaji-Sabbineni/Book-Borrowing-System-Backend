@@ -15,7 +15,7 @@ exports.requestToBorrow = async (req, res, next) => {
             owner: book.owners[0]
         });
         await request.save();
-        res.status(201).json({ message: 'Borrowing request created', request})
+        res.status(201).json({ message: 'Borrowing request created', request })
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -29,8 +29,11 @@ exports.updateRequestStatus = async (req, res, next) => {
         if (!request) {
             return res.status(404).json({ message: "Request not found" });
         }
-        if (request.owner.toString() === req.user._id.toString()) {
-            return res.status(202).json({ message: "You already own this book!" });
+        if (request.owner.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Not authorized to update this request" });
+        }
+        if (request.status !== 'pending') {
+            return res.status(400).json({ message: "cannot update a non-pending request" });
         }
         request.status = status;
         if (status === 'accepted') {
@@ -38,26 +41,31 @@ exports.updateRequestStatus = async (req, res, next) => {
             if (!book) {
                 return res.status(404).json({ message: "Book not found" });
             }
+            if (!book.available) {
+                return res.status(400).json({ message: "Book is no longer available" });
+            }
             book.available = false;
             book.borrower = request.requester;
-            const user = await User.findByIdAndUpdate(book.borrower, { $push: { books: book._id } });
+            await User.findByIdAndUpdate(book.borrower, { $push: { books: book._id } });
             book.tags = ['Borrowed'];
             request.borrowedDate = new Date();
             await book.save();
         } else if (status === 'rejected') {
             request.borrowedDate = null;
+        } else {
+            return res.status(400).json({ message: "Invalid status" });
         }
         await request.save();
         res.status(200).json({ message: "Request Updated", request });
     } catch (err) {
-
+        res.status(500).json({ message: err.message });
     }
 };
 
 exports.getBorrowingRequest = async (req, res, next) => {
     try {
         const requests = await Borrowing.find({ owner: req.user._id }).populate('book requester');
-        res.status(201).json(requests);
+        res.status(200).json(requests);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -71,24 +79,28 @@ exports.returnBook = async (req, res, next) => {
             return res.status(404).json({ message: "Request not found" });
         }
         if (request.owner.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: "User not authorized" });
+            return res.status(403).json({ message: "Not authorized to return this book" });
+        }
+        if (request.status !== 'accepted') {
+            return res.status(400).json({ message: "cannot return a book that hasn't been borrowed" });
         }
         request.status = 'returned';
         request.returnedDate = new Date();
-        
+
         const book = await Book.findById(request.book);
         if (!book) {
             return res.status(404).json({ message: "Book not found" });
         }
         book.available = true;
         book.borrower = null;
-        book.tags = ['Owned']
+        book.tags = ['Owned'];
+        await User.findByIdAndUpdate(req.user._id, { $pull: { books: book._id } });
+        await User.findByIdAndUpdate(book.owner, { $push: { books: book._id}});
         await request.save();
         await book.save();
-        
+
         res.status(200).json({ message: "Book returned successfully", request });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "An error occurred while returning the book" });
+        res.status(500).json({ message: err.message });
     }
 };

@@ -18,7 +18,7 @@ exports.addBook = async (req, res, next) => {
                 author: req.body.author,
                 genre: req.body.genre,
                 owners: [req.user._id],
-                available: req.body.available,
+                available: true,
                 borrowedDate: null,
                 returnedDate: null,
                 tags: ['Owned']
@@ -30,7 +30,7 @@ exports.addBook = async (req, res, next) => {
             user.books.push(book._id);
             await user.save();
         }
-        //await User.findByIdAndUpdate(req.user._id, { $push: { books: savedBook._id } });
+        //await User.findByIdAndUpdate(req.user._id, { $addTOSet: { books: book._id } });
         res.status(201).json({ Status: true, savedBook });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -46,7 +46,7 @@ exports.showAllBooks = async (req, res, next) => {
                 ...booksWithoutV,
                 request: {
                     type: 'GET',
-                    url: `http://localhost:3000/user/books/${book._id}`
+                    url: `${req.protocol}://${req.get('host')}/user/books/${book._id}`
                 }
             };
         });
@@ -71,7 +71,7 @@ exports.findBook = async (req, res, next) => {
                 ...bookWithoutV,
                 request: {
                     type: "GET",
-                    url: `http://localhost:3000/user/books/${book._id}`
+                    url: `${req.protocol}://${req.get('host')}/user/books/${book._id}`
                 }
             });
         }
