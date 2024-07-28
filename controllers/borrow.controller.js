@@ -1,5 +1,6 @@
 const Borrowing = require('../models/borrow.model');
 const Book = require('../models/book.model');
+const User = require('../models/user.model');
 
 exports.requestToBorrow = async (req, res, next) => {
     try {
@@ -11,7 +12,7 @@ exports.requestToBorrow = async (req, res, next) => {
         const request = new Borrowing({
             book: book._id,
             requester: req.user._id,
-            owner: book.owner
+            owner: book.owners[0]
         });
         await request.save();
         res.status(201).json({ message: 'Borrowing request created', request})
@@ -28,8 +29,8 @@ exports.updateRequestStatus = async (req, res, next) => {
         if (!request) {
             return res.status(404).json({ message: "Request not found" });
         }
-        if (request.owner.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: "Not authorized to update this request" });
+        if (request.owner.toString() === req.user._id.toString()) {
+            return res.status(202).json({ message: "You already own this book!" });
         }
         request.status = status;
         if (status === 'accepted') {
@@ -39,6 +40,8 @@ exports.updateRequestStatus = async (req, res, next) => {
             }
             book.available = false;
             book.borrower = request.requester;
+            const user = await User.findByIdAndUpdate(book.borrower, { $push: { books: book._id } });
+            book.tags = ['Borrowed'];
             request.borrowedDate = new Date();
             await book.save();
         } else if (status === 'rejected') {
@@ -79,7 +82,7 @@ exports.returnBook = async (req, res, next) => {
         }
         book.available = true;
         book.borrower = null;
-        
+        book.tags = ['Owned']
         await request.save();
         await book.save();
         

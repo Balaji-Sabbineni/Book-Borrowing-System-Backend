@@ -2,21 +2,35 @@ const Book = require('../models/book.model');
 const User = require('../models/user.model');
 
 exports.addBook = async (req, res, next) => {
-    if (!req.user) {
-        return res.status(404).json({ message: "User Authentication failed" });
-    }
-    const book = new Book({
-        title: req.body.title,
-        author: req.body.author,
-        genre: req.body.genre,
-        owner: req.user._id,
-        available: req.body.available,
-        borrowedDate: req.body.borrowedDate,
-        returnedDate: req.body.returnedDate
-    });
     try {
+        if (!req.user) {
+            return res.status(404).json({ message: "User Authentication failed" });
+        }
+        
+        let book = await Book.findOne({ title: req.body.title, author: req.body.author, genre: req.body.genre });
+        if (book) {
+            if (!book.owners.includes(req.user._id)) {
+                book.owners.push(req.user._id);
+            }
+        } else {
+            book = new Book({
+                title: req.body.title,
+                author: req.body.author,
+                genre: req.body.genre,
+                owners: [req.user._id],
+                available: req.body.available,
+                borrowedDate: null,
+                returnedDate: null,
+                tags: ['Owned']
+            });
+        }
         const savedBook = await book.save();
-        await User.findByIdAndUpdate(req.user._id, { $push: { books: savedBook._id } });
+        const user = await User.findById(req.user._id);
+        if(!user.books.includes(book._id)){
+            user.books.push(book._id);
+            await user.save();
+        }
+        //await User.findByIdAndUpdate(req.user._id, { $push: { books: savedBook._id } });
         res.status(201).json({ Status: true, savedBook });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -42,9 +56,9 @@ exports.showAllBooks = async (req, res, next) => {
     }
 };
 
-exports.findBook = async (req,res, next) => {
+exports.findBook = async (req, res, next) => {
     try {
-        const {bookId, title, author} = req.body;
+        const { bookId, title, author } = req.body;
         let book;
 
         if (bookId) {
@@ -63,29 +77,29 @@ exports.findBook = async (req,res, next) => {
         }
 
         const query = {};
-        if(title){
-            query.title = {$regex: title, $options: 'i'};
+        if (title) {
+            query.title = { $regex: title, $options: 'i' };
         }
-        if(author){
-            query.author = {$regex: author, $options: 'i'};
+        if (author) {
+            query.author = { $regex: author, $options: 'i' };
         }
         const books = await Book.find(query);
-        if(books.length === 0){
-            return res.status(404).json({message: "No books found."});
+        if (books.length === 0) {
+            return res.status(404).json({ message: "No books found." });
         }
-        const booksWithUrls = books.map(book =>{
-            const { __v, ...booksWithoutV} = book.toObject();
+        const booksWithUrls = books.map(book => {
+            const { __v, ...booksWithoutV } = book.toObject();
             return {
                 ...booksWithoutV,
-                request:{
+                request: {
                     type: "GET",
                     url: `http://localhost:3000/user/books${book._id}`
                 }
             };
         });
-        res.status(201).json({booksWithUrls});
+        res.status(201).json({ booksWithUrls });
     } catch (err) {
-        res.status(500).json({message: err.message});
+        res.status(500).json({ message: err.message });
     }
 };
 
