@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = mongoose.Schema({
     firebaseUid: { type: String, required: true },
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true
@@ -12,10 +12,16 @@ const userSchema = mongoose.Schema({
     //     type: String,
     //     required: true
     // },
-    Firstname: { type: String },
-  Lastname: { type: String },
-  phonenumber:{type:Number},
-    books:[
+    Firstname: { 
+        type: String 
+    },
+    Lastname: { 
+        type: String 
+    },
+    phonenumber: { 
+        type: Number 
+    },
+    books: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Book'

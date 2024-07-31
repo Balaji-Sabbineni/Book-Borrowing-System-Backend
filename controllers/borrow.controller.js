@@ -78,7 +78,7 @@ exports.returnBook = async (req, res, next) => {
         if (!request) {
             return res.status(404).json({ message: "Request not found" });
         }
-        if (request.owner.toString() !== req.user._id.toString()) {
+        if (request.requester.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: "Not authorized to return this book" });
         }
         if (request.status !== 'accepted') {
