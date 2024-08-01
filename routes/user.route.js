@@ -8,20 +8,19 @@ const {
     signin,
     forgetPassword,
     updateUser,
-    deleteUser
+    deleteUser,
+    getCurrentUser
 } = require("../controllers/user.controller");
 
 
 router.post("/signup", signup);
-router.get('/protected', authMiddleware, (req, res) =>{
-    res.status(200).json({message:"protected route accessed", id: req.user._id});
-});
+router.get('/', authMiddleware, getCurrentUser);
 
 router.post("/signin", signin);
 //router.get('/', User.showUsers);
 
 router.post("/forget-password", forgetPassword);
-router.put('/updateUser', authMiddleware, updateUser);
+router.put('/updateUser/:id', authMiddleware, updateUser);
 router.delete('/:id', authMiddleware, deleteUser);
 
 

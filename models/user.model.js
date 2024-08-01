@@ -8,23 +8,25 @@ const userSchema = mongoose.Schema({
         required: true,
         unique: true
     },
-    // password:{
-    //     type: String,
-    //     required: true
-    // },
-    Firstname: { 
-        type: String 
+    Firstname: {
+        type: String
     },
-    Lastname: { 
-        type: String 
+    Lastname: {
+        type: String
     },
-    phonenumber: { 
-        type: Number 
+    phonenumber: {
+        type: Number
     },
     books: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Book'
+            book: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Book'
+            },
+            status: {
+                type: String,
+                default:'owned'
+            }
         }
     ]
 });

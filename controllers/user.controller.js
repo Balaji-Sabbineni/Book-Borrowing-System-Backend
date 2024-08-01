@@ -37,13 +37,14 @@ exports.signup = (req, res) => {
 };
 
 exports.signin = (req, res) => {
-  if (!req.body.email || !req.body.password) {
+  const { email, password } = req.body;
+  if (!email || !password) {
     return res.status(422).json({
       email: "email is required",
       password: "password is required",
     });
   }
-  firebase.signInWithEmailAndPassword(req.body.email, req.body.password)
+  firebase.signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
       const user = userCredential.user;
       User.findOne({ firebaseUid: user.uid })
@@ -54,8 +55,9 @@ exports.signin = (req, res) => {
           const token = jwt.sign(
             { userId: mongoUser._id },
             process.env.KEY,
-            { expiresIn: '5 minute' }
+            { expiresIn: '1h' }
           );
+          // res.setHeader('Authorization', `Bearer ${token}`);
           return res.status(200).json({
             message: "User Login Successful!",
             token: token,
@@ -134,9 +136,46 @@ exports.updateUser = (req, res) => {
     });
 };
 
+
+//change this method not working properly
+exports.getCurrentUser = (req, res) => {
+  const userId = req.user._id;
+
+  User.findById(userId)
+    .populate({
+      path: 'books.book'
+    })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      return res.status(200).json({
+        message: "User details retrieved successfully",
+        user: {
+          email: user.email,
+          Firstname: user.Firstname,
+          Lastname: user.Lastname,
+          phonenumber: user.phonenumber,
+          books: user.books.map(book => ({
+            book: {
+              title: book.book.title,
+              description: book.book.description,
+              tags: book.book.tags.map(tag => tag.name)
+            },
+            status: book.status,
+            _id: book._id
+          }))
+        }
+      });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+};
+
 exports.deleteUser = (req, res) => {
-  const {id} = req.params;
-  User.findOneAndDelete({_id: id})
+  const { id } = req.params;
+  User.findOneAndDelete({ _id: id })
     .then((deletedUser) => {
       if (!deletedUser) {
         return res.status(404).json({ error: "User not found" });
