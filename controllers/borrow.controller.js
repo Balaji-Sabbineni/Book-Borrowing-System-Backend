@@ -98,7 +98,7 @@ exports.returnBook = async (req, res, next) => {
 
         const book = await Book.findById(request.book);
         if (!book) {
-            return res.status(404).json({ message: "Book not found" });
+            return res.status(404).json({ message: "Error: 404, Book not found!" });
         }
         book.available = true;
         book.borrower = null;
