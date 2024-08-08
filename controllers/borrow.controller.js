@@ -105,6 +105,7 @@ exports.returnBook = async (req, res, next) => {
         book.tags = ['Owned'];
         await User.findByIdAndUpdate(req.user._id, { $pull: { books: { book: book._id } } });
         await User.findByIdAndUpdate(book.owner, { $push: { books: { book: book._id, status: 'owned' } } });
+
         await request.save();
         await book.save();
 
