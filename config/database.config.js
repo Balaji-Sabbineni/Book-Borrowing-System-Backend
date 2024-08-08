@@ -6,13 +6,13 @@ const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sen
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB_HRWFM9Dp9Hp3yQZL3_VqOizep1DxsKc",
-  authDomain: "book-management-33f91.firebaseapp.com",
-  projectId: "book-management-33f91",
-  storageBucket: "book-management-33f91.appspot.com",
-  messagingSenderId: "931381765311",
-  appId: "1:931381765311:web:d9f7a328b04fc8a057120a",
-  measurementId: "G-D6RVL1CL58"
+  apiKey: process.env.firebase_api_key,
+  authDomain: process.env.authDomain,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messaging_sender_id,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId
 };
 
 

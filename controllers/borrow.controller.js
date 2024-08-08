@@ -10,7 +10,7 @@ exports.requestToBorrow = async (req, res, next) => {
             return res.status(400).json({ message: 'Book not available' });
         }
 
-        if (req.user._id.toString() !== book.owners[0]) {
+        if (req.user._id.toString() === book.owners[0]) {
             return res.status(400).json({ message: 'Cannot borrow your own book' });
         }
         const request = new Borrowing({

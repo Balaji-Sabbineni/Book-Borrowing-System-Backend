@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const firebase = require("../config/database.config");
 const User = require('../models/user.model');
 require('dotenv').config();
+const Book = require('../models/book.model');
 
 exports.signup = (req, res) => {
   if (!req.body.email || !req.body.password) {
@@ -136,40 +137,40 @@ exports.updateUser = (req, res) => {
     });
 };
 
-
-//change this method not working properly
 exports.getCurrentUser = (req, res) => {
-  const userId = req.user._id;
+  const { id } = req.params;
 
-  User.findById(userId)
-    .populate({
-      path: 'books.book'
-    })
+  User.findOne({id})
+    .populate('books.book', '_id title')
     .then((user) => {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      return res.status(200).json({
-        message: "User details retrieved successfully",
-        user: {
-          email: user.email,
-          Firstname: user.Firstname,
-          Lastname: user.Lastname,
-          phonenumber: user.phonenumber,
-          books: user.books.map(book => ({
-            book: {
-              title: book.book.title,
-              description: book.book.description,
-              tags: book.book.tags.map(tag => tag.name)
-            },
-            status: book.status,
-            _id: book._id
-          }))
-        }
-      });
+      const booksWithDetails = Promise.all(
+        user.books.map(async (bookItem) => {
+          const book = Book.findById(bookItem.book);
+          return {
+            title: book ? book.title : 'Unknown Title', // Handle case where book may not be found
+            status: bookItem.status,
+            _id: bookItem.book,
+          };
+        })
+      );
+  
+      // Return the user data along with books
+      const response = {
+        _id: user._id,
+        firebaseUid: user.firebaseUid,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        phonenumber: user.phonenumber,
+        books: booksWithDetails,
+      };
+      return res.status(200).json(user);
     })
-    .catch((err) => {
-      return res.status(500).json({ error: err.message });
+    .catch((error) => {
+      return res.status(500).json({ error: error.message });
     });
 };
 
