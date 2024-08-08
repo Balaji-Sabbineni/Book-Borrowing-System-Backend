@@ -9,8 +9,8 @@ router.get('/', BookController.showAllBooks);
 
 router.get('/search', BookController.findBook);
 
-router.patch('/:id', BookController.updateBook);
+router.patch('/:id', authMiddleware, BookController.updateBook);
 
-router.delete('/:id', BookController.deleteBook);
+router.delete('/:id', authMiddleware, BookController.deleteBook);
 
 module.exports = router;

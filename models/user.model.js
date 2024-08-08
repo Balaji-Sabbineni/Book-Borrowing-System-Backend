@@ -2,24 +2,31 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = mongoose.Schema({
-    name:{
+    firebaseUid: { type: String, required: true },
+    email: {
         type: String,
         required: true,
         unique: true
     },
-    email:{
-        type: String,
-        required: true,
-        unique: true
+    Firstname: {
+        type: String
     },
-    password:{
-        type: String,
-        required: true
+    Lastname: {
+        type: String
     },
-    books:[
+    phonenumber: {
+        type: Number
+    },
+    books: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Book'
+            book: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Book'
+            },
+            status: {
+                type: String,
+                default:'owned'
+            }
         }
     ]
 });
@@ -33,5 +40,5 @@ const userSchema = mongoose.Schema({
 //     });
 // });
 
-const UserModel = mongoose.model('User', userSchema);
-module.exports = UserModel;
+const User = mongoose.model('User', userSchema);
+module.exports = User;

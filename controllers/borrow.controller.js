@@ -9,6 +9,10 @@ exports.requestToBorrow = async (req, res, next) => {
         if (!book || !book.available) {
             return res.status(400).json({ message: 'Book not available' });
         }
+
+        if (req.user._id.toString() === book.owners[0]) {
+            return res.status(400).json({ message: 'Cannot borrow your own book' });
+        }
         const request = new Borrowing({
             book: book._id,
             requester: req.user._id,
@@ -46,9 +50,14 @@ exports.updateRequestStatus = async (req, res, next) => {
             }
             book.available = false;
             book.borrower = request.requester;
-            await User.findByIdAndUpdate(book.borrower, { $push: { books: book._id } });
+            const user = await User.findById(book.borrower);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            user.books.push({ book: book._id, status: 'borrowed' });
             book.tags = ['Borrowed'];
             request.borrowedDate = new Date();
+            await user.save();
             await book.save();
         } else if (status === 'rejected') {
             request.borrowedDate = null;
@@ -78,7 +87,7 @@ exports.returnBook = async (req, res, next) => {
         if (!request) {
             return res.status(404).json({ message: "Request not found" });
         }
-        if (request.owner.toString() !== req.user._id.toString()) {
+        if (request.requester.toString() !== req.user._id.toString()) {
             return res.status(403).json({ message: "Not authorized to return this book" });
         }
         if (request.status !== 'accepted') {
@@ -94,8 +103,9 @@ exports.returnBook = async (req, res, next) => {
         book.available = true;
         book.borrower = null;
         book.tags = ['Owned'];
-        await User.findByIdAndUpdate(req.user._id, { $pull: { books: book._id } });
-        await User.findByIdAndUpdate(book.owner, { $push: { books: book._id}});
+        await User.findByIdAndUpdate(req.user._id, { $pull: { books: { book: book._id } } });
+        await User.findByIdAndUpdate(book.owner, { $push: { books: { book: book._id, status: 'owned' } } });
+
         await request.save();
         await book.save();
 

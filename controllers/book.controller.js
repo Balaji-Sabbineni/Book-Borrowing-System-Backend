@@ -6,7 +6,7 @@ exports.addBook = async (req, res, next) => {
         if (!req.user) {
             return res.status(404).json({ message: "User Authentication failed" });
         }
-        
+
         let book = await Book.findOne({ title: req.body.title, author: req.body.author, genre: req.body.genre });
         if (book) {
             if (!book.owners.includes(req.user._id)) {
@@ -26,7 +26,7 @@ exports.addBook = async (req, res, next) => {
         }
         const savedBook = await book.save();
         const user = await User.findById(req.user._id);
-        if(!user.books.includes(book._id)){
+        if (!user.books.includes(book._id)) {
             user.books.push(book._id);
             await user.save();
         }
@@ -117,7 +117,10 @@ exports.deleteBook = async (req, res, next) => {
     try {
         const bookId = req.params.id;
         const deletedBook = await Book.findByIdAndDelete(bookId);
-        res.status(200).json(deletedBook);
+        if (!deletedBook) {
+            res.status(404).json({ message: "Book not found" });
+        }
+        res.status(200).json({ message: "Deleted Book Successfully", deletedBook });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
