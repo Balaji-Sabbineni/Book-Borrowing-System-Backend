@@ -17,6 +17,8 @@
     "book-borrowing-system-backend": "file:",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "express-rate-limiter": "^1.3.1",
     "firebase": "^10.12.4",
     "firebase-admin": "^12.3.0",
     "jsonwebtoken": "^9.0.2",
