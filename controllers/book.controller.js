@@ -7,7 +7,7 @@ exports.addBook = async (req, res, next) => {
             return res.status(404).json({ message: "User Authentication failed" });
         }
 
-        let book = await Book.findOne({ title: req.body.title, author: req.body.author, genre: req.body.genre });
+        let book = await Book.findOne({ title: req.body.title, author: req.body.author, genre: req.body.genre }).lean();
         if (book) {
             if (!book.owners.includes(req.user._id)) {
                 book.owners.push(req.user._id);
