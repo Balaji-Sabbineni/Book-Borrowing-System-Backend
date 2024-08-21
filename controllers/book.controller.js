@@ -68,7 +68,7 @@ exports.findBook = async (req, res, next) => {
         let book;
 
         if (bookId) {
-            book = await Book.findById(bookId);
+            book = await Book.findById({ bookId: { $eq: bookId } });
             if (!book) {
                 return res.status(404).json({ message: "Book not found." });
             }
@@ -119,7 +119,7 @@ exports.updateBook = async (req, res, next) => {
                 sanitizedBody[prop] = req.body[prop];
             }
         }
-        const updatedBook = await Book.findByIdAndUpdate(bookId, sanitizedBody, { new: true });
+        const updatedBook = await Book.findByIdAndUpdate({ bookId: { $eq: bookId } }, sanitizedBody, { new: true });
         res.status(200).json(updatedBook);
     } catch (err) {
         res.status(500).json({ message: err.message });
