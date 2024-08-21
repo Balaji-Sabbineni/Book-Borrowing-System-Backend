@@ -130,3 +130,4 @@ dist
 .pnp.*
 nodemon.json
 book-management-33f91-firebase-adminsdk-1pzse-d7ee21a82d.json
+.env

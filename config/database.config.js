@@ -1,18 +1,16 @@
 const mongoose = require('mongoose');
 const { initializeApp } = require("firebase/app");
-//const { getAuth } = require("firebase/auth");
 const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } = require("firebase/auth");
-//const { getFirestore } = require("firebase/firestore");
 
 
 const firebaseConfig = {
-  apiKey: process.env.firebase_api_key,
-  authDomain: process.env.authDomain,
-  projectId: process.env.projectId,
-  storageBucket: process.env.storageBucket,
-  messagingSenderId: process.env.messaging_sender_id,
-  appId: process.env.appId,
-  measurementId: process.env.measurementId
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.AUTHDOMAIN,
+  projectId: process.env.PROJECTID,
+  storageBucket: process.env.STORAGEBUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APPID,
+  measurementId: process.env.MEASUREMENTID
 };
 
 
