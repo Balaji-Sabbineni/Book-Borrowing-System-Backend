@@ -21,8 +21,17 @@ app.use(limiter);
 
 app.get('/:path', function(req, res) {
   let path = req.params.path;
-  if (isValidPath(path))
-    res.sendFile(path);
+  try {
+    // Resolve the file path and verify it is under the root directory
+    filePath = fs.realpathSync(path.resolve(ROOT, filePath));
+    if (!filePath.startsWith(ROOT)) {
+      res.status(403).send('Access denied');
+      return;
+    }
+    res.sendFile(filePath);
+  } catch (error) {
+    res.status(400).send('Invalid path');
+  }
 });
 
 app.use(body_parser.json());

@@ -7,7 +7,11 @@ exports.addBook = async (req, res, next) => {
             return res.status(404).json({ message: "User Authentication failed" });
         }
 
-        let book = await Book.findOne({ title: req.body.title, author: req.body.author, genre: req.body.genre }).lean();
+        let book = await Book.findOne({
+            title: { $eq: req.body.title },
+            author: { $eq: req.body.author },
+            genre: { $eq: req.body.genre }
+        }).lean();
         if (book) {
             if (!book.owners.includes(req.user._id)) {
                 book.owners.push(req.user._id);
@@ -58,7 +62,9 @@ exports.showAllBooks = async (req, res, next) => {
 
 exports.findBook = async (req, res, next) => {
     try {
-        const { bookId, title, author } = req.body;
+        const bookId = req.body.bookId;
+        const title = req.body.title;
+        const author = req.body.author;
         let book;
 
         if (bookId) {
@@ -106,7 +112,14 @@ exports.findBook = async (req, res, next) => {
 exports.updateBook = async (req, res, next) => {
     try {
         const bookId = req.params.id;
-        const updatedBook = await Book.findByIdAndUpdate(bookId, req.body, { new: true });
+        const allowedProperties = ['title', 'author', 'genre', 'owners', 'available', 'borrowedDate', 'returnedDate', 'tags'];
+        const sanitizedBody = {};
+        for (const prop of allowedProperties) {
+            if (req.body.hasOwnProperty(prop)) {
+                sanitizedBody[prop] = req.body[prop];
+            }
+        }
+        const updatedBook = await Book.findByIdAndUpdate(bookId, sanitizedBody, { new: true });
         res.status(200).json(updatedBook);
     } catch (err) {
         res.status(500).json({ message: err.message });

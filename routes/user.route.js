@@ -14,7 +14,7 @@ const {
 
 
 router.post("/signup", signup);
-router.get('/', authMiddleware, getCurrentUser);
+router.get('/:id', authMiddleware, getCurrentUser);
 
 router.post("/signin", signin);
 //router.get('/', User.showUsers);

@@ -5,7 +5,7 @@ const User = require('../models/user.model');
 exports.requestToBorrow = async (req, res, next) => {
     try {
         const { bookId } = req.body;
-        const book = await Book.findById(bookId);
+        const book = await Book.findById({ _id: { $eq: bookId } });
         if (!book || !book.available) {
             return res.status(400).json({ message: 'Book not available' });
         }
@@ -29,7 +29,7 @@ exports.updateRequestStatus = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        const request = await Borrowing.findById(id);
+        const request = await Borrowing.findById({ _id: { $eq: id } });
         if (!request) {
             return res.status(404).json({ message: "Request not found" });
         }

@@ -114,7 +114,7 @@ exports.updateUser = (req, res) => {
     });
   }
   User.findOneAndUpdate(
-    { email: email },
+    { email: {$eq: email} },
     { $set: { Firstname: Firstname, Lastname: Lastname, phonenumber: phonenumber } },
     { new: true, runValidators: true }
   )
@@ -140,7 +140,7 @@ exports.updateUser = (req, res) => {
 exports.getCurrentUser = (req, res) => {
   const { id } = req.params;
 
-  User.findOne({id})
+  User.findOne({ _id: { $eq: id } })
     .populate('books.book', '_id title')
     .then((user) => {
       if (!user) {
@@ -156,7 +156,7 @@ exports.getCurrentUser = (req, res) => {
           };
         })
       );
-  
+
       // Return the user data along with books
       const response = {
         _id: user._id,
@@ -176,7 +176,7 @@ exports.getCurrentUser = (req, res) => {
 
 exports.deleteUser = (req, res) => {
   const { id } = req.params;
-  User.findOneAndDelete({ _id: id })
+  User.findOneAndDelete({ _id: { $eq: id } })
     .then((deletedUser) => {
       if (!deletedUser) {
         return res.status(404).json({ error: "User not found" });
